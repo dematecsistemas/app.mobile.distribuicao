@@ -12,11 +12,18 @@ class MenuProvider extends ChangeNotifier {
   void _init() {
     menuItems = [
       MenuItemModel(
-        title: 'Logística',
-        subtitle: 'Funcionalidades de logística',
-        icon: PhosphorIconsRegular.truck,
+        title: 'Consultas',
+        subtitle: 'Consultas de produtos e endereços',
+        icon: PhosphorIconsRegular.magnifyingGlass,
         iconColor: Colors.blue,
-        route: '/menu-logistic',
+        route: '/menu-search',
+      ),
+      MenuItemModel(
+        title: 'Armazenamentos',
+        subtitle: 'Armazenamento de mercadorias',
+        icon: PhosphorIconsRegular.garage,
+        iconColor: Colors.blue,
+        route: '/menu-storage',
       ),
     ];
     notifyListeners();

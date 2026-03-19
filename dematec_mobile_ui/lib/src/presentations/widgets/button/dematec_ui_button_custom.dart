@@ -170,11 +170,32 @@ class DematecUiButtonCustom extends StatelessWidget {
 
     if (type == DematecUiTypeButtonWidget.normal) {
       if (colorType == DematecUiColorTypeWidget.neutral) {
-        return (colorTypeText?.color(context) ?? Colors.grey);
+        return (colorTypeText?.color(context) ??
+            DematecUiColorsConstants.neutral800);
       }
       return (colorTypeText?.color(context) ?? Colors.white);
     } else {
+      if (colorType == DematecUiColorTypeWidget.neutral) {
+        return (colorTypeText?.color(context) ??
+            DematecUiColorsConstants.neutral700);
+      }
       return (colorTypeText ?? colorType).color(context);
+    }
+  }
+
+  Color getBorderColor(BuildContext context) {
+    if (type == DematecUiTypeButtonWidget.outline) {
+      if (disabled) {
+        return DematecUiColorsConstants.neutral300;
+      }
+
+      if (colorType == DematecUiColorTypeWidget.neutral) {
+        return DematecUiColorsConstants.neutral400;
+      }
+
+      return colorType.color(context);
+    } else {
+      return Colors.transparent;
     }
   }
 
@@ -202,17 +223,6 @@ class DematecUiButtonCustom extends StatelessWidget {
         case DematecUiColorTypeWidget.normal:
           return Colors.black;
       }
-    } else {
-      return Colors.transparent;
-    }
-  }
-
-  Color getBorderColor(BuildContext context) {
-    if (type == DematecUiTypeButtonWidget.outline) {
-      if (disabled) {
-        return DematecUiColorsConstants.neutral300;
-      }
-      return colorType.color(context);
     } else {
       return Colors.transparent;
     }

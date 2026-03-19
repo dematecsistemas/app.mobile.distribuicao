@@ -1,10 +1,10 @@
 import 'package:dematec_mobile/core/model/menu_item_model.dart';
 import 'package:flutter/material.dart';
 
-class MenuLogisticProvider extends ChangeNotifier {
+class MenuSearchProvider extends ChangeNotifier {
   List<MenuItemModel> menuItems = [];
 
-  MenuLogisticProvider() {
+  MenuSearchProvider() {
     _init();
   }
 

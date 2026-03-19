@@ -33,7 +33,12 @@ class SplashView extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Image.asset(ImagesConstants.logo, fit: BoxFit.cover),
+                      // Image.asset(
+                      //   ImagesConstants.logo_drawed_vertical,
+                      //   fit: BoxFit.cover,
+                      //   width: 150,
+                      //   height: 150,
+                      // ),
                       const DematecUiCircularProgressIndicator(),
                     ],
                   ),

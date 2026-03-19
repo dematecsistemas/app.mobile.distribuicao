@@ -49,7 +49,12 @@ class AuthView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Image.asset(ImagesConstants.logoSmall),
+                            // Image.asset(
+                            //   ImagesConstants.logo,
+                            //   fit: BoxFit.cover,
+                            //   height: 125,
+                            //   width: 125,
+                            // ),
                             const SizedBox(height: 8),
                             const DematecUiTitleLarge(
                               text: 'Entrar na conta',

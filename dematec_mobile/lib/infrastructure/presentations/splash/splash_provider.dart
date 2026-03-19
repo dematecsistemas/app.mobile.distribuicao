@@ -13,6 +13,8 @@ class SplashProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
+    // await Future.delayed(const Duration(seconds: 10));
+
     await _loadAppVersion();
   }
 

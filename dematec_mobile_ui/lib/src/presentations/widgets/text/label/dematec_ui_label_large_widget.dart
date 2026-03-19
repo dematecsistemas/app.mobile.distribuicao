@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../../../dematec_mobile_ui.dart';
 
 class DematecUiLabelLarge extends StatelessWidget {
-  const DematecUiLabelLarge({super.key, required this.text, this.color});
+  const DematecUiLabelLarge({
+    super.key,
+    required this.text,
+    this.color,
+    this.fontWeight,
+  });
   final String text;
   final Color? color;
+  final FontWeight? fontWeight;
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +19,7 @@ class DematecUiLabelLarge extends StatelessWidget {
       text,
       style: Theme.of(context).textTheme.labelLarge!.copyWith(
         color: color ?? DematecUiColorsConstants.neutral800,
+        fontWeight: fontWeight,
       ),
     );
   }

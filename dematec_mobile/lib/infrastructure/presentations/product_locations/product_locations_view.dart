@@ -13,8 +13,60 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 
-class ProductLocationsView extends StatelessWidget {
+class ProductLocationsView extends StatefulWidget {
   const ProductLocationsView({super.key});
+
+  @override
+  State<ProductLocationsView> createState() => _ProductLocationsViewState();
+}
+
+class _ProductLocationsViewState extends State<ProductLocationsView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openSearchScreen();
+    });
+  }
+
+  Future<void> _openSearchScreen() async {
+    final productSearchService = context.read<ProductSearchService>();
+    final state = context.read<ProductLocationsProvider>();
+
+    final selectedProduct = await Navigator.push<ProductModel>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GenericSearchScreen(
+          title: 'Buscar Produto',
+          searchHint: 'Informe a descrição do produto...',
+          filters: [
+            // SearchFilterOption(
+            //   label: 'Descrição',
+            //   value: ProductSearchType.description,
+          ],
+          initialFilter: ProductSearchType.description,
+          onSearch: (query, selectedFilter, page) async {
+            final result = await productSearchService.searchProduct(
+              page,
+              query,
+            );
+
+            return result.fold(
+              (error) => throw error,
+              (successData) => successData.data,
+            );
+          },
+          itemBuilder: (context, product) {
+            return ProductSimpleCardWidget(product: product);
+          },
+        ),
+      ),
+    );
+
+    if (selectedProduct != null) {
+      state.loadLocationsForProduct(selectedProduct.idProduct);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +113,7 @@ class ProductLocationsView extends StatelessWidget {
                                                 .searchProduct(page, query);
 
                                             return result.fold(
-                                              (error) => throw Exception(
-                                                error.message,
-                                              ),
+                                              (error) => throw error,
                                               (successData) => successData.data,
                                             );
                                           },
@@ -100,34 +150,34 @@ class ProductLocationsView extends StatelessWidget {
   Widget _buildBodyContent(ProductLocationsProvider state) {
     switch (state.statusScreen) {
       case StatusScreenEnum.initial:
-        return SliverFillRemaining(
-          hasScrollBody: false,
-          child: Padding(
-            padding: UiPaddings.screen,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  PhosphorIconsRegular.package,
-                  size: 48,
-                  color: DematecUiColorsConstants.neutral400,
-                ),
-                const SizedBox(height: 16),
-                const DematecUiLabelMedium(
-                  text: 'Nenhum produto selecionado',
-                  color: DematecUiColorsConstants.neutral600,
-                ),
-                const SizedBox(height: 8),
-                const DematecUiLabelSmall(
-                  text:
-                      'Utilize o botão acima para pesquisar um produto e visualizar onde ele está armazenado.',
-                  textAlign: TextAlign.center,
-                  color: DematecUiColorsConstants.neutral500,
-                ),
-              ],
-            ),
-          ),
-        );
+        // return SliverFillRemaining(
+        //   hasScrollBody: false,
+        //   child: Padding(
+        //     padding: UiPaddings.screen,
+        //     child: Column(
+        //       mainAxisAlignment: MainAxisAlignment.center,
+        //       children: [
+        //         Icon(
+        //           PhosphorIconsRegular.package,
+        //           size: 48,
+        //           color: DematecUiColorsConstants.neutral400,
+        //         ),
+        //         const SizedBox(height: 16),
+        //         const DematecUiLabelMedium(
+        //           text: 'Nenhum produto selecionado',
+        //           color: DematecUiColorsConstants.neutral600,
+        //         ),
+        //         const SizedBox(height: 8),
+        //         const DematecUiLabelSmall(
+        //           text:
+        //               'Utilize o botão acima para pesquisar um produto e visualizar onde ele está armazenado.',
+        //           textAlign: TextAlign.center,
+        //           color: DematecUiColorsConstants.neutral500,
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        return const SliverToBoxAdapter(child: SizedBox.shrink());
 
       case StatusScreenEnum.loading:
         return const SliverFillRemaining(
@@ -136,9 +186,55 @@ class ProductLocationsView extends StatelessWidget {
         );
 
       case StatusScreenEnum.error:
-        return const SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(child: Text('Erro ao buscar os endereços do produto.')),
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: DematecUiColorsConstants.error50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    PhosphorIconsRegular.warningCircle,
+                    size: 48,
+                    color: DematecUiColorsConstants.error500,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const DematecUiLabelMedium(
+                  text: 'Ops! Não encontramos nada.',
+                  fontWeight: FontWeight.w700,
+                  color: DematecUiColorsConstants.neutral800,
+                ),
+                const SizedBox(height: 8),
+
+                DematecUiLabelSmall(
+                  text: state.errorMessage.isNotEmpty
+                      ? state.errorMessage
+                      : 'Ocorreu um erro inesperado ao buscar os dados.',
+                  textAlign: TextAlign.center,
+                  color: DematecUiColorsConstants.neutral500,
+                ),
+
+                const SizedBox(height: 32),
+
+                DematecUiButtonCustom(
+                  title: 'Limpar e tentar novamente',
+                  iconLeft: PhosphorIconsRegular.arrowCounterClockwise,
+                  type: DematecUiTypeButtonWidget.outline,
+                  colorType: DematecUiColorTypeWidget.neutral,
+                  size: DematecUiSizeWidget.large,
+                  onPressed: () {
+                    state.clearSearch();
+                  },
+                ),
+              ],
+            ),
+          ),
         );
 
       case StatusScreenEnum.success:
@@ -160,13 +256,14 @@ class ProductLocationsView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       DematecUiButtonCustom(
-                        title: 'Pesquisar Outro Produto',
+                        title: 'Pesquisar outro Produto',
                         iconLeft: PhosphorIconsRegular.magnifyingGlass,
                         type: DematecUiTypeButtonWidget.outline,
                         colorType: DematecUiColorTypeWidget.info,
                         size: DematecUiSizeWidget.large,
                         onPressed: () {
-                          state.clearSearch();
+                          _openSearchScreen();
+                          // state.clearSearch();
                         },
                       ),
 

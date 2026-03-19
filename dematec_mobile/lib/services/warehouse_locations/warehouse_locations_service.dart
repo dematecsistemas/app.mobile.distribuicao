@@ -4,4 +4,7 @@ import 'package:dematec_mobile/model/location_model.dart';
 
 abstract class WarehouseLocationsService {
   Future<Either<ApiException, List<LocationModel>>> getAllLocations();
+  Future<Either<ApiException, List<LocationModel>>> searchLocations(
+    String query,
+  );
 }

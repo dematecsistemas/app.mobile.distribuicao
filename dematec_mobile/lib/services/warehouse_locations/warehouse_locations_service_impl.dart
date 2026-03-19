@@ -26,4 +26,24 @@ class WarehouseLocationsServiceImpl implements WarehouseLocationsService {
       },
     );
   }
+
+  @override
+  Future<Either<ApiException, List<LocationModel>>> searchLocations(
+    String query,
+  ) async {
+    final result = await _warehouseLocationRepository.searchLocations(query);
+
+    return result.fold(
+      (error) {
+        return Left(error);
+      },
+      (locationsSearchResponse) {
+        final locationModel = locationsSearchResponse
+            .map((response) => response.toModel())
+            .toList();
+
+        return Right(locationModel);
+      },
+    );
+  }
 }

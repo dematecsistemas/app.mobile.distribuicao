@@ -1,5 +1,7 @@
 import 'package:dematec_mobile/core/enum/general/status_screen_enum.dart';
+import 'package:dematec_mobile/core/exceptions/api_exception.dart';
 import 'package:dematec_mobile/infrastructure/presentations/shared/screens/scanner_screen.dart';
+import 'package:dematec_mobile/utils/util.dart';
 import 'package:dematec_mobile_ui/dematec_mobile_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -49,6 +51,7 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
 
   StatusScreenEnum _statusScreenEnum = StatusScreenEnum.initial;
   String? _errorMessage;
+  int? _errorStatusCode;
   List<T>? _results;
 
   int _currentPage = 1;
@@ -81,6 +84,7 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
     setState(() {
       _statusScreenEnum = StatusScreenEnum.initial;
       _errorMessage = '';
+      _errorStatusCode = null;
       _results = null;
       _currentPage = 1;
       _hasMore = true;
@@ -102,7 +106,6 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
     });
 
     try {
-      // Chama a função que foi passada por parâmetro lá de fora
       final results = await widget.onSearch(
         query,
         _selectedFilter,
@@ -111,15 +114,27 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
       setState(() {
         _results = results;
         _statusScreenEnum = StatusScreenEnum.success;
-        // Se a primeira página já veio vazia ou com poucos itens, assumimos que acabou
         if (results.isEmpty) {
           _hasMore = false;
         }
       });
     } catch (e) {
       debugPrint('Erro real na busca: $e');
+
+      String cleanMessage = 'Ocorreu um erro inesperado.';
+      int? code;
+
+      if (e is ApiException) {
+        cleanMessage = e.message;
+        code = e.statusCode;
+      } else {
+        // Se for outro erro de sistema, limpamos o texto "Exception"
+        cleanMessage = e.toString().replaceAll('Exception: ', '');
+      }
+
       setState(() {
-        _errorMessage = 'Ocorreu um erro ao realizar a busca.';
+        _errorMessage = cleanMessage;
+        _errorStatusCode = code;
         _statusScreenEnum = StatusScreenEnum.error;
         _results = [];
       });
@@ -242,22 +257,25 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
                     onEditingComplete: _performSearch,
                     onChange: (_) => resetSearch(),
                     onTapScanner: () async {
-                      // 1. Esconde o teclado caso ele esteja aberto
+                      // Esconde o teclado caso ele esteja aberto
                       FocusManager.instance.primaryFocus?.unfocus();
 
-                      // 2. Abre a tela do Scanner e espera ela devolver o código
-                      final codigoLido = await Navigator.push<String>(
+                      // Abre a tela do Scanner e espera ela devolver o código
+                      final rawScannedCode = await Navigator.push<String>(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              const ScannerScreen(), // Aquela tela com a UI do Nubank
+                          builder: (context) => const ScannerScreen(),
                         ),
                       );
 
-                      // 3. Quando a tela do Scanner fechar, verificamos se o usuário leu algo
-                      if (codigoLido != null && codigoLido.isNotEmpty) {
+                      // Quando a tela do Scanner fechar, verificamos se o usuário leu algo
+                      if (rawScannedCode != null && rawScannedCode.isNotEmpty) {
+                        final scannedCodeResult = Util.getScannedCode(
+                          rawScannedCode,
+                        );
+
                         // Preenche o seu DematecUiSearchField com o código lido
-                        _searchController.text = codigoLido;
+                        _searchController.text = scannedCodeResult;
 
                         // Dispara a busca automaticamente no banco de dados!
                         _performSearch();
@@ -287,38 +305,95 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
       case StatusScreenEnum.initial:
         return SliverFillRemaining(
           hasScrollBody: false,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                PhosphorIconsRegular.magnifyingGlass,
-                size: 48,
-                color: DematecUiColorsConstants.neutral400,
-              ),
-              const SizedBox(height: 16),
-              const DematecUiLabelMedium(
-                text: 'Pronto para buscar',
-                color: DematecUiColorsConstants.neutral600,
-              ),
-              const SizedBox(height: 8),
-              const DematecUiLabelSmall(
-                text:
-                    'Digite sua pesquisa acima e aperte enter/buscar no teclado.',
-                textAlign: TextAlign.center,
-                color: DematecUiColorsConstants.neutral500,
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: DematecUiColorsConstants.neutral50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    PhosphorIconsRegular.magnifyingGlass,
+                    size: 48,
+                    color: DematecUiColorsConstants.neutral400,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                const DematecUiLabelLarge(
+                  text: 'Pronto para busca',
+                  fontWeight: FontWeight.w700,
+                  color: DematecUiColorsConstants.neutral800,
+                ),
+                const SizedBox(height: 8),
+
+                const DematecUiLabelMedium(
+                  text:
+                      'Digite sua pesquisa acima e aperte enter no teclado para buscar.',
+                  textAlign: TextAlign.center,
+                  color: DematecUiColorsConstants.neutral500,
+                ),
+              ],
+            ),
           ),
         );
 
       case StatusScreenEnum.success:
         if (_results!.isEmpty) {
-          return const SliverFillRemaining(
+          return SliverFillRemaining(
             hasScrollBody: false,
-            child: Center(
-              child: DematecUiLabelMedium(
-                text: 'Nenhum resultado encontrado.',
-                color: DematecUiColorsConstants.neutral600,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: DematecUiColorsConstants.neutral50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      PhosphorIconsRegular.magnifyingGlass,
+                      size: 48,
+                      color: DematecUiColorsConstants.neutral400,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  const DematecUiLabelLarge(
+                    text: 'Nenhum resultado encontrado',
+                    fontWeight: FontWeight.w700,
+                    color: DematecUiColorsConstants.neutral800,
+                  ),
+                  const SizedBox(height: 8),
+
+                  const DematecUiLabelMedium(
+                    text:
+                        'Não encontramos nenhum item com o termo pesquisado. Verifique a ortografia ou tente usar outro filtro.',
+                    textAlign: TextAlign.center,
+                    color: DematecUiColorsConstants.neutral500,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  DematecUiButtonCustom(
+                    title: 'Limpar pesquisa',
+                    iconLeft: PhosphorIconsRegular.eraser,
+                    type: DematecUiTypeButtonWidget.outline,
+                    colorType: DematecUiColorTypeWidget.neutral,
+                    size: DematecUiSizeWidget.large,
+                    onPressed: () {
+                      _searchController.clear();
+                      resetSearch();
+                      FocusManager.instance.primaryFocus?.requestFocus();
+                    },
+                  ),
+                ],
               ),
             ),
           );
@@ -343,7 +418,6 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
                 padding: const EdgeInsets.only(bottom: 6.0),
                 child: InkWell(
                   onTap: () {
-                    // O GRANDE MOMENTO: Devolve o item selecionado para a tela anterior!
                     Navigator.pop(context, item);
                   },
                   borderRadius: BorderRadius.circular(8),
@@ -356,11 +430,66 @@ class _GenericSearchScreenState<T, F> extends State<GenericSearchScreen<T, F>> {
         );
 
       case StatusScreenEnum.error:
+        final is404 = _errorStatusCode == 404;
+
+        final bgColor = is404
+            ? DematecUiColorsConstants.inverseSurface100
+            : DematecUiColorsConstants.error50;
+        final iconColor = is404
+            ? DematecUiColorsConstants.inverseSurface500
+            : DematecUiColorsConstants.error500;
+        final icon = is404
+            ? PhosphorIconsRegular.warning
+            : PhosphorIconsRegular.warningCircle;
+        final title = is404 ? 'Atenção' : 'Ops! Algo deu errado.';
+
         return SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(
-            child: DematecUiLabelLarge(
-              text: _errorMessage ?? 'Ocorreu um erro ao buscar dados.',
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 48, color: iconColor),
+                ),
+                const SizedBox(height: 24),
+
+                DematecUiLabelLarge(
+                  text: title,
+                  fontWeight: FontWeight.w700,
+                  color: DematecUiColorsConstants.neutral800,
+                ),
+                const SizedBox(height: 8),
+
+                DematecUiLabelMedium(
+                  text:
+                      _errorMessage ??
+                      'Ocorreu um erro inesperado ao buscar os dados.',
+                  textAlign: TextAlign.center,
+                  color: DematecUiColorsConstants.neutral500,
+                ),
+
+                const SizedBox(height: 32),
+
+                DematecUiButtonCustom(
+                  title: 'Limpar pesquisa',
+                  iconLeft: PhosphorIconsRegular.eraser,
+                  type: DematecUiTypeButtonWidget.outline,
+                  colorType: DematecUiColorTypeWidget.neutral,
+                  size: DematecUiSizeWidget.large,
+                  onPressed: () {
+                    _searchController.clear();
+                    resetSearch();
+                    FocusManager.instance.primaryFocus?.requestFocus();
+                  },
+                ),
+              ],
             ),
           ),
         );

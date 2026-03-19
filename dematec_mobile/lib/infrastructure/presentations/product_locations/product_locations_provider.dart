@@ -13,6 +13,9 @@ class ProductLocationsProvider extends ChangeNotifier {
   StatusScreenEnum _statusScreen = StatusScreenEnum.initial;
   StatusScreenEnum get statusScreen => _statusScreen;
 
+  String _errorMessage = '';
+  String get errorMessage => _errorMessage;
+
   ProductWithLocationsModel? _productWithLocations;
   ProductWithLocationsModel? get locations => _productWithLocations;
 
@@ -29,11 +32,14 @@ class ProductLocationsProvider extends ChangeNotifier {
     result.fold(
       (error) {
         _statusScreen = StatusScreenEnum.error;
+        _productWithLocations = null;
+        _errorMessage = error.message;
         notifyListeners();
       },
       (successData) {
         _productWithLocations = successData;
         _statusScreen = StatusScreenEnum.success;
+        _errorMessage = '';
         notifyListeners();
       },
     );
@@ -42,6 +48,7 @@ class ProductLocationsProvider extends ChangeNotifier {
   void clearSearch() {
     _statusScreen = StatusScreenEnum.initial;
     _productWithLocations = null;
+    _errorMessage = '';
     notifyListeners();
   }
 }

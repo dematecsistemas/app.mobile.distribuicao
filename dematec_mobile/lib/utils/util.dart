@@ -6,6 +6,22 @@ import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Util {
+  static String getScannedCode(String scannedCode) {
+    /* 
+      Usado para quando ler um valor de QR CODE. Esse valor pode
+      vir com um string numerica com varios valores ou pode vir somente com
+      o código do produto. Essa função faz esse tratamento.
+    */
+
+    final code = scannedCode.trim();
+
+    if (code.length < 15) {
+      return code;
+    }
+
+    return code.substring(2, 15);
+  }
+
   static String formatDate(DateTime? dateTime) {
     if (dateTime == null) {
       return '';

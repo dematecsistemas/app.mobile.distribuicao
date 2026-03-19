@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "dematec_mobile",
+            "cwd": "dematec_mobile",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "dematec_mobile (profile mode)",
+            "cwd": "dematec_mobile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "dematec_mobile (release mode)",
+            "cwd": "dematec_mobile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "dematec_mobile_ui",
+            "cwd": "dematec_mobile_ui",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "dematec_mobile_ui (profile mode)",
+            "cwd": "dematec_mobile_ui",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "dematec_mobile_ui (release mode)",
+            "cwd": "dematec_mobile_ui",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

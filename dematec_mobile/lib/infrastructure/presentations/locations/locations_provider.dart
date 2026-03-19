@@ -8,24 +8,22 @@ class LocationsProvider extends ChangeNotifier {
 
   LocationsProvider(this._productsLocationsService) {
     _init();
-  } 
+  }
 
   StatusScreenEnum _statusScreen = StatusScreenEnum.initial;
   StatusScreenEnum get statusScreen => _statusScreen;
 
+  String _errorMessage = '';
+  String get errorMessage => _errorMessage;
+
   LocationWithProductStoredModel? _locations;
   LocationWithProductStoredModel? get locations => _locations;
 
-  TextEditingController searchInput = TextEditingController();
-  String searchText = '';
-
   Future<void> _init() async {}
 
-  Future<void> getLocationWithProducts() async {
-    final int searchInputInt = int.tryParse(searchText) ?? 0;
-
-    if (searchInputInt <= 0) {
-      _statusScreen = StatusScreenEnum.initial;
+  Future<void> loadProductsForLocation(int locationId) async {
+    if (locationId <= 0) {
+      _statusScreen = StatusScreenEnum.error;
       _locations = null;
       notifyListeners();
       return;
@@ -35,42 +33,28 @@ class LocationsProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _productsLocationsService
-        .getAllProductsStoredByLocationId(searchInputInt);
- 
+        .getAllProductsStoredByLocationId(locationId);
+
     result.fold(
       (error) {
         _statusScreen = StatusScreenEnum.error;
         _locations = null;
-        print('Erro na busca: ${error.message}');
+        _errorMessage = error.message;
+        debugPrint('Erro na busca de produtos por endereço: ${error.message}');
       },
       (success) {
         _statusScreen = StatusScreenEnum.success;
         _locations = success;
+        _errorMessage = '';
       },
     );
 
     notifyListeners();
   }
 
-  void onChangeSearchInput(String text) {
-    searchText = text;
-
-    // Se o texto ficou vazio (ex: usuário clicou no X do DematecUiSearchField)
-    if (text.isEmpty) {
-      _statusScreen = StatusScreenEnum.initial;
-      _locations = null;
-    }
-
+  void clearSearch() {
+    _statusScreen = StatusScreenEnum.initial;
+    _locations = null;
     notifyListeners();
-  }
-
-  void onSearch() {
-    getLocationWithProducts();
-  }
-
-  @override
-  void dispose() {
-    searchInput.dispose();
-    super.dispose();
   }
 }
