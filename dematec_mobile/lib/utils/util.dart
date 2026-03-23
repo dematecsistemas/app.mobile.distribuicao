@@ -22,6 +22,20 @@ class Util {
     return code.substring(2, 15);
   }
 
+  static String formatQuantity(double? quantity) {
+    if (quantity == null) return '0';
+
+    if (quantity % 1 == 0) {
+      return quantity.toInt().toString();
+    }
+
+    String formatted = quantity.toStringAsFixed(2);
+
+    return formatted
+        .replaceAll(RegExp(r'0*$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
+  }
+
   static String formatDate(DateTime? dateTime) {
     if (dateTime == null) {
       return '';

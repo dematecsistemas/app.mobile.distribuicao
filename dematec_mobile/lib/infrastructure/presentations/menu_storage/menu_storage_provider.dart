@@ -15,7 +15,7 @@ class MenuStorageProvider extends ChangeNotifier {
         subtitle: 'Vincular produto à um endereço',
         // icon: PhosphorIconsRegular.mapPinArea,
         // iconColor: Colors.blue,
-        route: '/locations',
+        route: '/inventory-location',
       ),
       MenuItemModel(
         title: 'Armazenar Produtos',

@@ -1,5 +1,6 @@
 import 'package:dematec_mobile/infrastructure/presentations/auth/auth_view.dart';
 import 'package:dematec_mobile/infrastructure/presentations/home/home_view.dart';
+import 'package:dematec_mobile/infrastructure/presentations/inventory_location/inventory_location_module.dart';
 import 'package:dematec_mobile/infrastructure/presentations/locations/locations_module.dart';
 import 'package:dematec_mobile/infrastructure/presentations/menu/menu_view.dart';
 import 'package:dematec_mobile/infrastructure/presentations/menu_search/menu_search_view.dart';
@@ -30,6 +31,10 @@ final routes = GoRouter(
     GoRoute(
       path: '/product-locations',
       builder: (context, state) => ProductLocationsModule(),
+    ),
+    GoRoute(
+      path: '/inventory-location',
+      builder: (context, state) => InventoryLocationModule(),
     ),
   ],
 );

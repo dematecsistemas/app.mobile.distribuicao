@@ -1,4 +1,5 @@
 import 'package:dematec_mobile/model/product_location_model.dart';
+import 'package:dematec_mobile/utils/util.dart';
 import 'package:dematec_mobile_ui/dematec_mobile_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -79,7 +80,7 @@ class StorageLocationCardWidget extends StatelessWidget {
                   color: DematecUiColorsConstants.neutral500,
                 ),
                 Text(
-                  location.onHandQuantity?.toStringAsFixed(2) ?? '0.00',
+                  Util.formatQuantity(location.onHandQuantity),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,

@@ -1,3 +1,4 @@
+import 'package:dematec_mobile/infrastructure/presentations/shared/components/bottom_sheets/product_detail/product_detail_bottom_sheet_widget.dart';
 import 'package:dematec_mobile/model/product_stored_model.dart';
 import 'package:dematec_mobile_ui/dematec_mobile_ui.dart';
 import 'package:flutter/material.dart';
@@ -79,21 +80,38 @@ class _ProductStoredCardWidgetState extends State<ProductStoredCardWidget> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: DematecUiColorsConstants.neutral100,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: DematecUiColorsConstants.neutral200,
+                  InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        // Importante para o modal poder crescer se o conteúdo for grande
+                        isScrollControlled: true,
+                        // Deixe transparente para ver as bordas arredondadas do seu container
+                        backgroundColor: Colors.transparent,
+                        builder: (context) {
+                          return ProductDetailBottomSheetWidget(
+                            product: widget.product,
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: DematecUiColorsConstants.neutral100,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: DematecUiColorsConstants.neutral200,
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        PhosphorIconsRegular.image,
-                        color: DematecUiColorsConstants.neutral400,
-                        size: 24,
+                      child: Center(
+                        child: Icon(
+                          PhosphorIconsRegular.image,
+                          color: DematecUiColorsConstants.neutral400,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),

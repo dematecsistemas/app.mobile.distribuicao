@@ -1,5 +1,5 @@
 import 'package:dematec_mobile/infrastructure/presentations/home/home_provider.dart';
-import 'package:dematec_mobile/infrastructure/presentations/shared/components/bottom_sheets/bottom_sheet_user_options.dart';
+import 'package:dematec_mobile/infrastructure/presentations/shared/components/bottom_sheets/user_options/bottom_sheet_user_options.dart';
 import 'package:dematec_mobile_ui/dematec_mobile_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
