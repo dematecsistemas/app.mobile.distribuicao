@@ -68,8 +68,8 @@ class InventoryLocationProvider extends ChangeNotifier {
         isSuccess = false;
       },
       (_) {
+        // _selectedLocation = null;
         _selectedProduct = null;
-        _selectedLocation = null;
         isSuccess = true;
       },
     );

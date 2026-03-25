@@ -26,10 +26,12 @@ class InventoryLocationView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: DematecUiButtonCustom(
-                title: 'Confirmar Vinculação',
-                iconLeft: PhosphorIconsRegular.link,
+                title: state.isLoading
+                    ? 'Vinculando...'
+                    : 'Confirmar Vinculação',
+                iconLeft: state.isLoading ? null : PhosphorIconsRegular.link,
                 type: DematecUiTypeButtonWidget.normal,
-                colorType: DematecUiColorTypeWidget.success,
+                colorType: DematecUiColorTypeWidget.info,
                 size: DematecUiSizeWidget.large,
                 disabled: !state.canLink || state.isLoading,
                 loading: state.isLoading,
@@ -39,12 +41,45 @@ class InventoryLocationView extends StatelessWidget {
                   if (!context.mounted) return;
 
                   if (success) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Produto vinculado com sucesso!'),
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            const Icon(
+                              PhosphorIconsFill.checkCircle,
+                              color: DematecUiColorsConstants.white,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  DematecUiLabelSmall(
+                                    text: 'Sucesso!',
+                                    fontWeight: FontWeight.w700,
+                                    color: DematecUiColorsConstants.white,
+                                  ),
+                                  DematecUiLabelSmall(
+                                    text: 'Produto vinculado ao endereço.',
+                                    color: DematecUiColorsConstants.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                         backgroundColor:
                             DematecUiColorsConstants.surfaceVariant500,
                         behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        margin: const EdgeInsets.all(16),
+                        duration: const Duration(seconds: 3),
+                        elevation: 4, // Uma leve sombra
                       ),
                     );
                   }
@@ -205,16 +240,26 @@ class InventoryLocationView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        // color: DematecUiColorsConstants.surfaceVariant100,
+        color: DematecUiColorsConstants.neutral50, // Fundo neutro e suave
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: DematecUiColorsConstants.neutral400),
+        border: Border.all(
+          color: DematecUiColorsConstants.neutral200,
+        ), // Borda discreta
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: DematecUiColorsConstants.surfaceVariant600,
-            size: 28,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: DematecUiColorsConstants.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: DematecUiColorsConstants.neutral200),
+            ),
+            child: Icon(
+              icon,
+              color: DematecUiColorsConstants.primary500,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -223,8 +268,7 @@ class InventoryLocationView extends StatelessWidget {
               children: [
                 DematecUiLabelSmall(
                   text: title,
-                  fontWeight: FontWeight.w600,
-                  color: DematecUiColorsConstants.surfaceVariant700,
+                  color: DematecUiColorsConstants.neutral500,
                 ),
                 const SizedBox(height: 2),
                 DematecUiLabelMedium(
@@ -238,7 +282,7 @@ class InventoryLocationView extends StatelessWidget {
 
           IconButton(
             icon: const Icon(PhosphorIconsRegular.trash),
-            color: DematecUiColorsConstants.error500,
+            color: DematecUiColorsConstants.neutral400,
             onPressed: onClear,
             tooltip: 'Remover seleção',
           ),
